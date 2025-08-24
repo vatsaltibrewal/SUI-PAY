@@ -199,21 +199,45 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="flex-1 p-4 space-y-6">
+        {/* Stats Cards */}
+        {analytics && (
+          <div className="grid grid-cols-3 gap-6">
+            <Card className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+              <CardContent className="p-6 text-center">
+                <p className="text-3xl font-bold text-cyan-400 mb-2">{analytics.overview.totalPayments}</p>
+                <p className="text-sm font-bold text-black uppercase tracking-wide">Payments</p>
+              </CardContent>
+            </Card>
+            <Card className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+              <CardContent className="p-6 text-center">
+                <p className="text-3xl font-bold text-cyan-400 mb-2">{analytics.overview.uniqueDonors}</p>
+                <p className="text-sm font-bold text-black uppercase tracking-wide">Supporters</p>
+              </CardContent>
+            </Card>
+            <Card className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+              <CardContent className="p-6 text-center">
+                <p className="text-3xl font-bold text-cyan-400 mb-2">${analytics.overview.averageAmount.toFixed(2)}</p>
+                <p className="text-sm font-bold text-black uppercase tracking-wide">Average</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Earnings Card */}
         <Card className="brutalist-border bg-card">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle className="text-lg font-bold text-card-foreground uppercase flex items-center">
               <TrendingUp className="mr-2 h-5 w-5" />
               This Month's Earnings
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6 p-6">
-            <div className="text-4xl font-bold text-card-foreground">${totalEarnings.toFixed(2)}</div>
-            <div className="h-80 w-full border-4 border-black bg-white p-6 rounded-lg">
+          <CardContent className="pt-2 px-6 pb-6">
+            <div className="text-4xl font-bold text-card-foreground mb-6">${totalEarnings.toFixed(2)}</div>
+            <div className="h-80 w-full bg-white rounded-lg p-4 ml-6">
               <div className="h-full w-full">
                 {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 30, right: 30, left: 30, bottom: 30 }}>
+                    <LineChart data={chartData} margin={{ top: 10, right: 10, left: 40, bottom: 10 }}>
                       <CartesianGrid
                         strokeDasharray="none"
                         stroke="#000000"
@@ -263,24 +287,7 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            
-            {/* Stats Summary */}
-            {analytics && (
-              <div className="grid grid-cols-3 gap-6 pt-6 mt-6 border-t-2 border-border">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-card-foreground">{analytics.overview.totalPayments}</p>
-                  <p className="text-sm text-muted-foreground font-semibold uppercase">Payments</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-card-foreground">{analytics.overview.uniqueDonors}</p>
-                  <p className="text-sm text-muted-foreground font-semibold uppercase">Supporters</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-card-foreground">${analytics.overview.averageAmount.toFixed(2)}</p>
-                  <p className="text-sm text-muted-foreground font-semibold uppercase">Average</p>
-                </div>
-              </div>
-            )}
+
           </CardContent>
         </Card>
 
