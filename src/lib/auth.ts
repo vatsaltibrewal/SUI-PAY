@@ -77,28 +77,37 @@ export class AuthService {
 
 // Middleware for API route authentication
 export function withAuth(handler: Function) {
-  return async (req: any, res: any) => {
+  return async (req: any, context?: any) => {
     try {
-      const authHeader = req.headers.authorization;
+      const authHeader = req.headers.get ? req.headers.get('authorization') : req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Authentication required' });
+        return new Response(JSON.stringify({ error: 'Authentication required' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
 
       const token = authHeader.substring(7);
       const session = await AuthService.validateSession(token);
 
       if (!session) {
-        return res.status(401).json({ error: 'Invalid or expired session' });
+        return new Response(JSON.stringify({ error: 'Invalid or expired session' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
 
       // Add creator info to request
       req.creator = session.creator;
       req.token = token;
 
-      return handler(req, res);
+      return handler(req, context);
     } catch (error) {
       console.error('Auth middleware error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      return new Response(JSON.stringify({ error: 'Internal server error' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
   };
 }
