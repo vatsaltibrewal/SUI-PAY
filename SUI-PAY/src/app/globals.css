@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated to Neo-Brutalist color scheme with cyan blue accent */
+  --background: #fafafa;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #00d1ff;
+  --primary-foreground: #000000;
+  --secondary: #e0e0e0;
+  --secondary-foreground: #000000;
+  --muted: #e0e0e0;
+  --muted-foreground: #4a4a4a;
+  --accent: #00d1ff;
+  --accent-foreground: #000000;
+  --destructive: #ff2e63;
+  --destructive-foreground: #ffffff;
+  --border: #000000;
+  --input: #fafafa;
+  --ring: rgba(0, 209, 255, 0.5);
+  --chart-1: #00d1ff;
+  --chart-2: #000000;
+  --chart-3: #4a4a4a;
+  --chart-4: #e0e0e0;
+  --chart-5: #ffffff;
+  --radius: 0.25rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #00d1ff;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #e0e0e0;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #000000;
+  --sidebar-ring: rgba(0, 209, 255, 0.5);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* Added custom font variables for IBM Plex Sans */
+  --font-sans: var(--font-ibm-plex-sans);
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    /* Added Neo-Brutalist styling with sharp edges and bold appearance */
+    font-weight: 400;
+    line-height: 1.5;
+  }
+}
+
+@layer utilities {
+  /* Fixed Neo-Brutalist utility classes to avoid circular dependencies */
+  .brutalist-shadow {
+    box-shadow: 4px 4px 0px #000000;
+  }
+
+  .brutalist-border {
+    border: 2px solid #000000;
+  }
+
+  .brutalist-button {
+    border: 2px solid #000000;
+    box-shadow: 4px 4px 0px #000000;
+    transition: transform 0.2s;
+  }
+
+  .brutalist-button:hover {
+    transform: scale(1.05);
+  }
+
+  .brutalist-input {
+    border: 2px solid #000000;
+    background: #fafafa;
+  }
+
+  .brutalist-input:focus {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* SUI Connect Button Styling */
+  .sui-connect-wrapper button {
+    background: #00D1FF !important;
+    color: #000000 !important;
+    border: 4px solid #000000 !important;
+    box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    border-radius: 0 !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .sui-connect-wrapper button:hover {
+    background: #00A8CC !important;
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1) !important;
+  }
+
+  .sui-connect-wrapper button:active {
+    transform: translate(4px, 4px) !important;
+    box-shadow: 0px 0px 0px 0px rgba(0,0,0,1) !important;
+  }
+}
