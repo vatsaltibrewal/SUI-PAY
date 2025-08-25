@@ -83,6 +83,24 @@ export async function POST(req: NextRequest) {
       minDonationAmount: 1.0
     });
 
+    // Create default shareable link for the creator
+    try {
+      await DataStore.createLink({
+        creatorId: creator.id,
+        slug: creator.username,
+        title: `Support ${displayName}`,
+        description: bio || `Support ${displayName} with SUI payments`,
+        buttonText: 'Send Tip',
+        theme: 'default',
+        isActive: true,
+        clickCount: 0
+      });
+      console.log('Created default shareable link for creator:', creator.username);
+    } catch (linkError) {
+      console.warn('Failed to create default shareable link:', linkError);
+      // Don't fail registration if link creation fails
+    }
+
     // Create session
     const sessionToken = await AuthService.createSession(creator.id, creator.email, creator.username);
 

@@ -1,5 +1,8 @@
-// Local storage-based data management
-// For development - easily replaceable with real database in production
+// JSON file-based data persistence system
+// Stores all data in JSON files within the project
+
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 
 export interface Creator {
   id: string;
@@ -61,83 +64,89 @@ export interface Analytics {
   linkClicks: number;
 }
 
-// Storage keys
-const STORAGE_KEYS = {
-  creators: 'sui-pay-creators',
-  payments: 'sui-pay-payments',
-  links: 'sui-pay-links',
-  analytics: 'sui-pay-analytics',
-  sessions: 'sui-pay-sessions'
+// File paths for JSON storage
+const DATA_DIR = join(process.cwd(), 'data');
+export const FILE_PATHS = {
+  creators: join(DATA_DIR, 'creators.json'),
+  payments: join(DATA_DIR, 'payments.json'),
+  links: join(DATA_DIR, 'links.json'),
+  analytics: join(DATA_DIR, 'analytics.json')
 };
 
-// Universal storage that works both client and server-side
-export class UniversalStorage {
-  private static data: Map<string, any[]> = new Map();
+// Utility function to generate unique IDs
+function generateId(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
 
-  static get<T>(key: string): T[] {
-    // Try localStorage first (client-side)
-    if (typeof window !== 'undefined') {
-      try {
-        const data = localStorage.getItem(key);
-        const parsed = data ? JSON.parse(data) : [];
-        this.data.set(key, parsed); // Sync with memory
-        return parsed;
-      } catch {
-        return [];
+// Ensure data directory exists
+function ensureDataDir(): void {
+  if (!existsSync(DATA_DIR)) {
+    mkdirSync(DATA_DIR, { recursive: true });
+  }
+}
+
+// JSON file storage class
+export class JSONStorage {
+  static get<T>(filePath: string): T[] {
+    try {
+      ensureDataDir();
+      if (existsSync(filePath)) {
+        const data = readFileSync(filePath, 'utf-8');
+        return JSON.parse(data);
       }
-    } else {
-      // Server-side: use in-memory storage
-      return this.data.get(key) || [];
+      // Create empty file if it doesn't exist
+      this.set(filePath, []);
+      return [];
+    } catch (error) {
+      console.error(`Error reading from file ${filePath}:`, error);
+      return [];
     }
   }
 
-  static set<T>(key: string, data: T[]): void {
-    // Update memory storage
-    this.data.set(key, data);
-    
-    // Update localStorage if available (client-side)
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(key, JSON.stringify(data));
-      } catch (error) {
-        console.error('Failed to save to localStorage:', error);
-      }
+  static set<T>(filePath: string, value: T[]): void {
+    try {
+      ensureDataDir();
+      writeFileSync(filePath, JSON.stringify(value, null, 2));
+    } catch (error) {
+      console.error(`Error writing to file ${filePath}:`, error);
     }
   }
 
-  static add<T extends { id: string }>(key: string, item: T): T {
-    const items = this.get<T>(key);
+  static add<T extends { id: string }>(filePath: string, item: T): T {
+    const items = this.get<T>(filePath);
     items.push(item);
-    this.set(key, items);
+    this.set(filePath, items);
     return item;
   }
 
-  static update<T extends { id: string }>(key: string, id: string, updates: Partial<T>): T | null {
-    const items = this.get<T>(key);
+  static update<T extends { id: string }>(filePath: string, id: string, updates: Partial<T>): T | null {
+    const items = this.get<T>(filePath);
     const index = items.findIndex(item => item.id === id);
+    
     if (index === -1) return null;
     
     items[index] = { ...items[index], ...updates };
-    this.set(key, items);
+    this.set(filePath, items);
     return items[index];
   }
 
-  static delete<T extends { id: string }>(key: string, id: string): boolean {
-    const items = this.get<T>(key);
+  static delete<T extends { id: string }>(filePath: string, id: string): boolean {
+    const items = this.get<T>(filePath);
     const filteredItems = items.filter(item => item.id !== id);
+    
     if (filteredItems.length === items.length) return false;
     
-    this.set(key, filteredItems);
+    this.set(filePath, filteredItems);
     return true;
   }
 
-  static find<T extends { id: string }>(key: string, predicate: (item: T) => boolean): T | null {
-    const items = this.get<T>(key);
+  static find<T extends { id: string }>(filePath: string, predicate: (item: T) => boolean): T | null {
+    const items = this.get<T>(filePath);
     return items.find(predicate) || null;
   }
 
-  static filter<T>(key: string, predicate: (item: T) => boolean): T[] {
-    const items = this.get<T>(key);
+  static filter<T>(filePath: string, predicate: (item: T) => boolean): T[] {
+    const items = this.get<T>(filePath);
     return items.filter(predicate);
   }
 }
@@ -153,27 +162,27 @@ export class DataStore {
       updatedAt: new Date().toISOString()
     };
     
-    return UniversalStorage.add(STORAGE_KEYS.creators, newCreator);
+    return JSONStorage.add(FILE_PATHS.creators, newCreator);
   }
 
   static async findCreatorByEmail(email: string): Promise<Creator | null> {
-    return UniversalStorage.find(STORAGE_KEYS.creators, (c: Creator) => c.email === email);
+    return JSONStorage.find(FILE_PATHS.creators, (c: Creator) => c.email === email);
   }
 
   static async findCreatorByUsername(username: string): Promise<Creator | null> {
-    return UniversalStorage.find(STORAGE_KEYS.creators, (c: Creator) => c.username === username);
+    return JSONStorage.find(FILE_PATHS.creators, (c: Creator) => c.username === username);
   }
 
   static async findCreatorByWallet(walletAddress: string): Promise<Creator | null> {
-    return UniversalStorage.find(STORAGE_KEYS.creators, (c: Creator) => c.walletAddress === walletAddress);
+    return JSONStorage.find(FILE_PATHS.creators, (c: Creator) => c.walletAddress === walletAddress);
   }
 
   static async findCreatorById(id: string): Promise<Creator | null> {
-    return UniversalStorage.find(STORAGE_KEYS.creators, (c: Creator) => c.id === id);
+    return JSONStorage.find(FILE_PATHS.creators, (c: Creator) => c.id === id);
   }
 
   static async updateCreator(id: string, updates: Partial<Creator>): Promise<Creator | null> {
-    return UniversalStorage.update(STORAGE_KEYS.creators, id, {
+    return JSONStorage.update(FILE_PATHS.creators, id, {
       ...updates,
       updatedAt: new Date().toISOString()
     });
@@ -186,11 +195,11 @@ export class DataStore {
       id: generateId()
     };
     
-    return UniversalStorage.add(STORAGE_KEYS.payments, newPayment);
+    return JSONStorage.add(FILE_PATHS.payments, newPayment);
   }
 
   static async findPaymentByTxHash(txHash: string): Promise<Payment | null> {
-    return UniversalStorage.find(STORAGE_KEYS.payments, (p: Payment) => p.txHash === txHash);
+    return JSONStorage.find(FILE_PATHS.payments, (p: Payment) => p.txHash === txHash);
   }
 
   static async getCreatorPayments(creatorId: string, options?: {
@@ -199,7 +208,7 @@ export class DataStore {
     startDate?: Date;
     endDate?: Date;
   }): Promise<{ payments: Payment[]; total: number }> {
-    let payments = UniversalStorage.filter(STORAGE_KEYS.payments, (p: Payment) => p.creatorId === creatorId);
+    let payments = JSONStorage.filter(FILE_PATHS.payments, (p: Payment) => p.creatorId === creatorId);
     
     // Apply date filters
     if (options?.startDate) {
@@ -302,30 +311,25 @@ export class DataStore {
       updatedAt: new Date().toISOString()
     };
     
-    return UniversalStorage.add(STORAGE_KEYS.links, newLink);
+    return JSONStorage.add(FILE_PATHS.links, newLink);
   }
 
   static async findLinkBySlug(slug: string): Promise<ShareableLink | null> {
-    return UniversalStorage.find(STORAGE_KEYS.links, (l: ShareableLink) => l.slug === slug);
+    return JSONStorage.find(FILE_PATHS.links, (l: ShareableLink) => l.slug === slug);
   }
 
   static async getCreatorLinks(creatorId: string): Promise<ShareableLink[]> {
-    return UniversalStorage.filter(STORAGE_KEYS.links, (l: ShareableLink) => l.creatorId === creatorId);
+    return JSONStorage.filter(FILE_PATHS.links, (l: ShareableLink) => l.creatorId === creatorId);
   }
 
   static async updateLink(id: string, updates: Partial<ShareableLink>): Promise<ShareableLink | null> {
-    return UniversalStorage.update(STORAGE_KEYS.links, id, {
+    return JSONStorage.update(FILE_PATHS.links, id, {
       ...updates,
       updatedAt: new Date().toISOString()
     });
   }
 
   static async deleteLink(id: string): Promise<boolean> {
-    return UniversalStorage.delete(STORAGE_KEYS.links, id);
+    return JSONStorage.delete(FILE_PATHS.links, id);
   }
-}
-
-// Utility function to generate IDs
-function generateId(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }

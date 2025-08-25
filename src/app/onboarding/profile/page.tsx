@@ -109,12 +109,22 @@ export default function ProfileSetupPage() {
     setIsSubmitting(true)
 
     try {
+      // Validate required data
+      if (!user.walletAddress) {
+        toast({
+          title: "Missing Wallet Address",
+          description: "Please go back and connect your wallet or verify your SUI NS name.",
+          variant: "destructive",
+        })
+        return
+      }
+
       // Register with the backend
       const registrationData = {
         email: email.trim(),
         username: user.username?.replace('@', '').replace('.suins', '') || `user_${Date.now()}`,
         displayName: name.trim(),
-        walletAddress: user.walletAddress || `0x${Math.random().toString(16).substring(2, 66)}`,
+        walletAddress: user.walletAddress,
         suiNameService: user.username?.startsWith('@') ? user.username : undefined,
         bio: bio.trim() || undefined,
         avatar: profilePicture || undefined,

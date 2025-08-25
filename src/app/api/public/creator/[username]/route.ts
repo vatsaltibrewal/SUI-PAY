@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DataStore, UniversalStorage, Creator } from '@/lib/storage';
+import { DataStore, JSONStorage, Creator, FILE_PATHS } from '@/lib/storage';
 
 export async function GET(req: NextRequest, context: { params: Promise<{ username: string }> }) {
   try {
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ usernam
     // If not found by username, try finding by the identifier pattern
     if (!creator) {
       // Try to find by partial username matching
-      const creators = UniversalStorage.get<Creator>('sui-pay-creators');
+      const creators = JSONStorage.get<Creator>(FILE_PATHS.creators);
       creator = creators.find(c => {
         const userIdentifier = c.username?.replace("@", "").replace(".suins", "") || 
                              c.walletAddress?.slice(2, 10) || 

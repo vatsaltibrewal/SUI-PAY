@@ -40,7 +40,7 @@ export default function OnboardingPage() {
     )
   }
 
-  const handleUsernameSubmit = () => {
+  const handleUsernameSubmit = async () => {
     if (!username.trim()) {
       toast({
         title: "Username Required",
@@ -50,10 +50,69 @@ export default function OnboardingPage() {
       return
     }
 
-    updateUser({ username: `@${username}.suins` })
+    // Validate SUI NS name first
+    try {
+      const response = await fetch('/api/suins/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nameOrAddress: username.trim()
+        }),
+      })
 
-    // Navigate to profile setup
-    window.location.href = "/onboarding/profile"
+      const result = await response.json()
+
+      if (!result.isValid || result.type !== 'suins') {
+        toast({
+          title: "Invalid SUI NS Name",
+          description: "This SUI NS name doesn't exist or is invalid. Please check and try again.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Show confirmation dialog with resolved wallet address
+      const confirmed = window.confirm(
+        `SUI NS Validation Successful!\n\n` +
+        `Name: @${username.trim()}.suins\n` +
+        `Resolves to: ${result.resolvedAddress}\n\n` +
+        `Is this your correct wallet address?`
+      )
+
+      if (!confirmed) {
+        toast({
+          title: "Verification Cancelled",
+          description: "Please verify your SUI NS name and wallet address before continuing.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Save validated data
+      updateUser({ 
+        username: `@${username.trim()}.suins`,
+        walletAddress: result.resolvedAddress
+      })
+
+      toast({
+        title: "SUI NS Verified!",
+        description: `Successfully verified ${username.trim()}.suins`,
+      })
+
+      // Navigate to profile setup
+      setTimeout(() => {
+        window.location.href = "/onboarding/profile"
+      }, 1000)
+
+    } catch (error) {
+      toast({
+        title: "Validation Failed",
+        description: "Could not validate SUI NS name. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleWalletConnect = async () => {
