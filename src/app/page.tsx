@@ -138,8 +138,6 @@ export default function OnboardingPage() {
           <div className="sui-connect-wrapper">
             <ConnectButton 
               connectText="CONNECT SUI WALLET"
-              connectedText="WALLET CONNECTED"
-              size="lg"
               style={{
                 width: '100%',
                 height: '48px',

@@ -151,11 +151,6 @@ export default function PaymentPage() {
       await signAndExecute(
         {
           transaction: tx,
-          options: {
-            showEvents: true,
-            showObjectChanges: true,
-            showEffects: true,
-          },
         },
         {
           onSuccess: async (result) => {
@@ -343,8 +338,6 @@ export default function PaymentPage() {
                 <div className="sui-connect-wrapper">
                   <ConnectButton 
                     connectText="CONNECT SUI WALLET"
-                    connectedText="WALLET CONNECTED"
-                    size="lg"
                     style={{
                       width: '100%',
                       height: '48px',

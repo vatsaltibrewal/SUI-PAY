@@ -17,7 +17,7 @@ async function getProfile(req: NextRequest & { creator: any }) {
     const creator = {
       ...creatorData,
       _count: {
-        payments: payments.length,
+        payments: payments.total,
         links: links.length
       }
     };

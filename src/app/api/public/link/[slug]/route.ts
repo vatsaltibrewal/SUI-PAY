@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DataStore } from '@/lib/storage';
 
-export async function GET(req: NextRequest, context: { params: { slug: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ slug: string }> }) {
   try {
-    const { slug } = context.params;
+    const { slug } = await context.params;
 
     // Find the shareable link
     const link = await DataStore.findLinkBySlug(slug);

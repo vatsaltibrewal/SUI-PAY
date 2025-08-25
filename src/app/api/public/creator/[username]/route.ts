@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DataStore, UniversalStorage, Creator } from '@/lib/storage';
 
-export async function GET(req: NextRequest, context: { params: { username: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ username: string }> }) {
   try {
-    const { username } = context.params;
+    const { username } = await context.params;
 
     // Find creator by username
     let creator = await DataStore.findCreatorByUsername(username.toLowerCase());

@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DataStore } from '@/lib/storage';
 import { withAuth } from '@/lib/auth';
 
-async function updateLink(req: NextRequest & { creator: any }, context: { params: { linkId: string } }) {
+async function updateLink(req: NextRequest & { creator: any }, context: { params: Promise<{ linkId: string }> }) {
   try {
-    const { linkId } = context.params;
+    const { linkId } = await context.params;
     const { title, description, buttonText, theme, isActive } = await req.json();
 
     // Verify link belongs to creator
@@ -41,9 +41,9 @@ async function updateLink(req: NextRequest & { creator: any }, context: { params
   }
 }
 
-async function deleteLink(req: NextRequest & { creator: any }, context: { params: { linkId: string } }) {
+async function deleteLink(req: NextRequest & { creator: any }, context: { params: Promise<{ linkId: string }> }) {
   try {
-    const { linkId } = context.params;
+    const { linkId } = await context.params;
 
     // Verify link belongs to creator
     const creatorLinks = await DataStore.getCreatorLinks(req.creator.id);
